@@ -20,3 +20,6 @@
 - [x] P6a. Criar simulação Rust determinística de malha fechada, sem conexões com hardware e sem informações privilegiadas ao controlador.
 - [ ] P6b. Implementar sensores físicos admissíveis e controladores comparadores com orçamento pareado antes dos experimentos MaleCNS.
 - [ ] P6c. Substituir a observação hipotética de obstáculo frontal por evidência de sensor real ou por uma modalidade explicitamente documentada.
+
+- [x] P7a. Carregar o artefato público MaleCNS com hashes e executar um observador neural real em paralelo a um baseline convencional, sem influenciar ações.
+- [ ] P7b. Pré-registrar um decodificador de saída motora e testar sua contribuição em ação fechada com baselines e nulos pareados.

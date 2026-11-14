@@ -48,3 +48,19 @@ jobs:
         run: cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --all-targets
       - name: Deterministic baseline demonstration
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml
+  malecns-shadow:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal
+      - name: Build neural reader and tests
+        run: cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --all-targets
+      - name: Fetch and verify pinned public MaleCNS source (no home network)
+        run: python scripts/prepare_malecns.py --output .research/malecns-verified
+      - name: Run frozen MaleCNS shadow observer and target-label null
+        run: |
+          cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin malecns_probe -- .research/malecns-verified/connectome.mcns .research/malecns-verified/ports.txt
