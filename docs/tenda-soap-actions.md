@@ -2,7 +2,7 @@
 
 ## Proveniência e estado
 
-Em 14/11/2026, o gateway mesh Tenda respondeu ao UPnP/SSDP. A leitura de `/rootDesc.xml`, `/L3F.xml`, `/WANCfg.xml` e `/WANIPCn.xml` demonstrou **três serviços e 18 métodos**. Um ensaio separado de 12 chamadas `GetStatusInfo` resultou em HTTP 200 em todas, mediana 6,55 ms. **Os nomes foram verificados diretamente no dispositivo; os argumentos abaixo são os esperados pelas especificações UPnP IGD v1 e ainda requerem comparação campo a campo com o SCPD dessa unidade.** Nesta rodada, o SSH do IFRO ficou inacessível, impedindo a nova leitura dos XMLs. Não se afirma que os outros 17 métodos foram invocados ou que devolvem dados reais.
+Em 14/11/2026, o gateway mesh Tenda respondeu ao UPnP/SSDP. A leitura de `/rootDesc.xml`, `/L3F.xml`, `/WANCfg.xml` e `/WANIPCn.xml` demonstrou **três serviços e 18 métodos**. Um ensaio separado de 12 chamadas `GetStatusInfo` resultou em HTTP 200 em todas, mediana 6,55 ms. **Os nomes e tipos de argumentos foram confrontados com os SCPDs reais da unidade em uma nova leitura, e não apenas inferidos da especificação.** Das 12 consultas, as dez sem parâmetros foram testadas e responderam HTTP 200. As duas consultas parametrizadas de regras NAT e seis mutações não foram executadas.
 
 A ferramenta [scripts/tenda_soap_audit.py](../scripts/tenda_soap_audit.py) faz esse confronto diretamente no IFRO: lista serviços, métodos, nomes e tipos de argumentos sem qualquer SOAP mutável. Com opção explícita, sonda apenas consultas de leitura sem parâmetros; omite valores retornados e nunca envia comandos que alterem a WAN.
 
@@ -70,3 +70,7 @@ Os relatórios JSON gerados são **locais**, não devem ser colocados no GitHub.
 - [UPnP IGD WANCommonInterfaceConfig v1](https://upnp.org/specs/gw/UPnP-gw-WANCommonInterfaceConfig-v1-Service.pdf)
 - [UPnP IGD WANIPConnection v1](https://paperzz.com/doc/7149834/wanipconnection-1-service-template-version-1.01)
 - [Go UPnP InternetGateway v1 typed methods](https://github.com/huin/goupnp/blob/main/dcps/internetgateway1/internetgateway1.go)
+
+## Captura e WSDL preservados
+
+Os XMLs originais, o WSDL 1.1 derivado, hashes e os resultados das dez consultas de leitura foram salvos privadamente no Jatobá e no IFRO. Consulte [tenda-wsdl.md](tenda-wsdl.md) para caminhos, geração offline e limites.

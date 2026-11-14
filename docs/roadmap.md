@@ -32,3 +32,5 @@
 
 - [x] P4c. Documentar os 18 métodos SOAP, parâmetros esperados, classificação de risco e auditor read-only offline com testes.
 - [ ] P4d. Revalidar assinaturas reais de argumentos de cada método no gateway, executar apenas as consultas permitidas e registrar latência.
+
+- [x] P4d. Preservar SCPDs originais e WSDL derivado no workspace e no IFRO; confrontar todos os 18 contratos reais e executar 10 consultas SOAP sem parâmetros somente de leitura.
