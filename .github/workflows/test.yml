@@ -1,12 +1,12 @@
-name: Tests
+name: Tests and Linux gateway
 on:
   push:
   pull_request:
 permissions:
   contents: read
 jobs:
-  unit:
-    runs-on: ubuntu-latest
+  python-protocol:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -16,3 +16,25 @@ jobs:
         run: PYTHONPATH=src python -m unittest discover -s tests -v
       - name: Compile Python source
         run: python -m compileall -q src tests
+  rust-gateway:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal
+      - name: Unit and protocol tests
+        run: cargo +stable test --manifest-path rust/drosobot-gateway/Cargo.toml --all-targets
+      - name: Linux release binary
+        run: cargo +stable build --release --manifest-path rust/drosobot-gateway/Cargo.toml
+      - name: Archive Linux binary
+        run: |
+          mkdir -p dist
+          cp rust/drosobot-gateway/target/release/drosobot dist/
+          sha256sum dist/drosobot > dist/SHA256SUMS
+      - name: Publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drosobot-linux-amd64
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
