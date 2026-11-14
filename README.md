@@ -68,3 +68,7 @@ O crate [drosobot-sim](rust/drosobot-sim/) oferece um primeiro teste determinís
 ## Primeira integração com o conectoma real
 
 O [MaleCNS shadow probe](docs/malecns-shadow.md) carrega o artefato congelado verificando SHA-256, executa a dinâmica recorrente real e compara leituras `dnl/dnr` com uma permutação negativa, **sem controlar o robô**. A simulação continua tendo um controlador convencional. As fontes e as limitações científicas estão registradas na documentação.
+
+## Localização Wi-Fi (simulação, sem coleta doméstica)
+
+O módulo [Wi-Fi fingerprinting](docs/wifi-localization.md) compara RSSI **sintético** entre regiões e retorna **desconhecido** para sinais ambíguos, obsoletos ou incompletos. Ainda não foi demonstrada telemetria Wi-Fi no firmware ESP-Hi. O método não oferece detecção de obstáculos.

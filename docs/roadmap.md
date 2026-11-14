@@ -23,3 +23,6 @@
 
 - [x] P7a. Carregar o artefato público MaleCNS com hashes e executar um observador neural real em paralelo a um baseline convencional, sem influenciar ações.
 - [ ] P7b. Pré-registrar um decodificador de saída motora e testar sua contribuição em ação fechada com baselines e nulos pareados.
+
+- [x] P4a. Contrato de varredura Wi-Fi em Rust, comparação de fingerprints e abstinência em cenário totalmente sintético.
+- [ ] P4b. Verificar API de medições reais no ESP-Hi; estudo de amostras privadas, holdout temporal e precisão por cômodo.

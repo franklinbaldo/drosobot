@@ -48,6 +48,8 @@ jobs:
         run: cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --all-targets
       - name: Deterministic baseline demonstration
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml
+      - name: Fictional Wi-Fi fingerprint demo (no collection)
+        run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin wifi_demo
   malecns-shadow:
     runs-on: ubuntu-24.04
     steps:
