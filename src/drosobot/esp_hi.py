@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 
 class RobotError(Exception):
@@ -32,7 +32,7 @@ class EspHi:
             raise ValueError('Expected a plain http://host[:port] URL and timeout 0..10 s')
         self.url = url.rstrip('/')
         self.timeout = timeout
-        self._opener = build_opener(NoRedirects)
+        self._opener = build_opener(ProxyHandler({}), NoRedirects)
 
     def _get(self, path: str, max_bytes: int = 65536) -> bytes:
         req = Request(self.url + path, headers={'User-Agent': 'DrosoBot-readonly/0.1'}, method='GET')

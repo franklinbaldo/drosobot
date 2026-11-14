@@ -55,4 +55,4 @@ PYTHONPATH=src python3 -m drosobot request-idle --supervised
 
 Não existe neste cliente chamada de marcha, salto ou calibração. Em caso de falha de rede, interrompa o teste; o programa **não garante parada física**. Consulte [protocolo e evidência](docs/esp-hi-http.md).
 
-Testes locais: `PYTHONPATH=src python3 -m unittest discover -s tests -v`.
+Testes locais: `PYTHONPATH=src python3 -m unittest discover -s tests -v`. O mesmo conjunto é executado no [GitHub Actions](https://github.com/franklinbaldo/drosobot/actions/workflows/test.yml), sem tentar falar com o robô real.
