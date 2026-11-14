@@ -64,3 +64,7 @@ O [gateway nativo Rust](rust/drosobot-gateway/) é a direção principal do runt
 ## Simulação isolada de navegação (Rust)
 
 O crate [drosobot-sim](rust/drosobot-sim/) oferece um primeiro teste determinístico, totalmente **sintético**, de observação egocêntrica → controlador convencional → árbitro de segurança → ambiente → nova observação. Não simula a mecânica do robô nem afirma executar MaleCNS. O gateway físico não importa esse crate. Consulte [os limites e as métricas do experimento](docs/simulation.md).
+
+## Primeira integração com o conectoma real
+
+O [MaleCNS shadow probe](docs/malecns-shadow.md) carrega o artefato congelado verificando SHA-256, executa a dinâmica recorrente real e compara leituras `dnl/dnr` com uma permutação negativa, **sem controlar o robô**. A simulação continua tendo um controlador convencional. As fontes e as limitações científicas estão registradas na documentação.

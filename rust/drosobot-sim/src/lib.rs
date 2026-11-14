@@ -242,3 +242,6 @@ mod tests {
         assert!(e.records.iter().any(|r|r.rejected && r.executed==Action::Idle));
     }
 }
+
+/// MaleCNS frozen operator: executable only with verified external artifact.
+pub mod malecns;
