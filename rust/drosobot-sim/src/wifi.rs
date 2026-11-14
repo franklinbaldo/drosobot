@@ -143,7 +143,8 @@ mod tests {
     #[test]
     fn malformed_signal_and_sparse_input_abstain() {
         let (refs,mut scans)=synthetic_reference();
-        scans[0].signals.push(scans[0].signals[0]);
+        let duplicate = scans[0].signals[0];
+        scans[0].signals.push(duplicate);
         assert_eq!(locate(&scans[0],&refs,1,Parameters::default()),Estimate::Unknown("invalid_observation"));
         scans[0].signals.truncate(1);
         assert_eq!(locate(&scans[0],&refs,1,Parameters::default()),Estimate::Unknown("invalid_observation"));
