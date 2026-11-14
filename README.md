@@ -1,6 +1,8 @@
-# MaleCNS ESP-Hi
+# DrosoBot
 
-Investigação aberta de robótica incorporada: adaptar um controlador experimental derivado do conectoma **MaleCNS** da mosca para um robô **ESP-Hi**, com computação central no **IFRO**.
+**A fly brain in a little robot body.**
+
+Projeto aberto de robótica incorporada: adaptar um controlador experimental derivado do conectoma **MaleCNS** da mosca para um robô **ESP-Hi**, com computação central no **IFRO**.
 
 > Status: fundação arquitetural; nenhum controle remoto físico, navegação autônoma ou leitura de posição real de servos demonstrados.
 

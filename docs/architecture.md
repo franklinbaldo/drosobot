@@ -1,4 +1,4 @@
-# Arquitetura proposta
+# Arquitetura proposta do DrosoBot
 
 ## Fluxo principal
 
