@@ -1,0 +1,37 @@
+# Documentary transcription ONLY from the Xiaozhi ESP-Hi reference firmware.
+# Not evidence of the flashed firmware, board revision, or real sensor readings.
+# Source: https://github.com/78/xiaozhi-esp32/blob/main/main/boards/espressif/esp-hi/config.h
+# This file does not trigger flashing, commands, or calibration.
+[board]
+name = "ESP-Hi (reference)"
+soc = "esp32c3"
+verified_on_physical_unit = false
+
+[servo_gpio_reference]
+front_left = 21
+front_right = 19
+back_left = 20
+back_right = 18
+
+[buttons_gpio_reference]
+boot = 9
+move_wake = 0
+audio_wake = 1
+
+[display_reference]
+mosi = 4
+clk = 5
+dc = 10
+width = 160
+height = 80
+
+[observability]
+servo_position_feedback_verified = false
+imu_verified = false
+contact_sensors_verified = false
+rssi_api_verified = false
+wifi_csi_api_verified = false
+
+[compatibility]
+original_voice_firmware_preserved = true
+hardware_flash_authorized = false

@@ -13,5 +13,6 @@
 - [ ] P8. Realizar teste físico progressivo e supervisionado; autonomia somente após obstáculos, quedas e paradas controladas.
 
 - [x] P1d. Implementar gateway Rust sem dependências para inspeção HTTP e pedido de postura ociosa supervisionado.
-- [ ] P1e. Compilar no CI, publicar binário e verificar inspeção real no IFRO sem mover robô.
+- [x] P1e-a. Compilar e testar gateway Rust no CI; publicar binário e instalar no IFRO com SHA-256 validado.
+- [ ] P1e-b. Verificar inspeção real no ESP-Hi quando a conexão HTTP local estiver disponível, sem mover robô.
 - [ ] P1f. Inventariar firmware e criar experimento Rust para ESP32-C3 em hardware de testes, sem flashing no robô principal.

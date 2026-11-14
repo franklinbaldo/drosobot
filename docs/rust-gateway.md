@@ -27,3 +27,7 @@ A automação do GitHub Actions executa testes Python (referência) e Rust no re
 - A disponibilidade do ESP-Hi por Wi-Fi oscila. Erro de conexão produz falha explícita; não se presume êxito.
 - RSSI, posição de servos, bateria e obstáculos não são expostos pelas rotas HTTP de referência e são sinalizados como **não medidos**.
 - O futuro watchdog e a parada física por perda de rede terão de residir no ESP-Hi, não apenas no IFRO.
+
+## Initial IFRO deployment, 2026-11-14
+
+The Rust release executable was built on the public GitHub Actions runner (Ubuntu 24.04), verified by SHA-256, and installed to `/opt/drosobot/bin/drosobot` on the IFRO. `/usr/local/bin/drosobot` loads the private local endpoint configuration and runs this Rust binary. The earlier Python launcher is retained locally for rollback; no private values are published. In the first read-only live probe, the robot did not respond to the TCP connection. This is an **unresolved connectivity/instrumentation gap**, not a successful hardware test. The existing Xiaozhi MCP voice bridge remains running independently.

@@ -17,3 +17,6 @@ config/local.env
 
 # Rust outputs
 **/target/
+
+# Local binaries downloaded from CI are never part of the public source tree
+.deploy/
