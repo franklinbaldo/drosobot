@@ -14,3 +14,6 @@ config/local.env
 
 # Local research artifacts; never commit vendor archives or host observations.
 .research/
+
+# Rust outputs
+**/target/

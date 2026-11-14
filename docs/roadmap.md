@@ -11,3 +11,7 @@
 - [ ] P6. Montar simulação fechada do ESP-Hi com sensores admissíveis e comparadores pareados.
 - [ ] P7. Adaptar núcleo MaleCNS/FlyDoom, com portas anatômicas, proveniência, testes e curvas de aprendizado.
 - [ ] P8. Realizar teste físico progressivo e supervisionado; autonomia somente após obstáculos, quedas e paradas controladas.
+
+- [x] P1d. Implementar gateway Rust sem dependências para inspeção HTTP e pedido de postura ociosa supervisionado.
+- [ ] P1e. Compilar no CI, publicar binário e verificar inspeção real no IFRO sem mover robô.
+- [ ] P1f. Inventariar firmware e criar experimento Rust para ESP32-C3 em hardware de testes, sem flashing no robô principal.

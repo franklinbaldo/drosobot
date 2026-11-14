@@ -1,0 +1,16 @@
+[package]
+name = "drosobot-gateway"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Minimal read-only ESP-Hi HTTP gateway with opt-in idle posture request"
+
+[lib]
+name = "drosobot_gateway"
+path = "src/lib.rs"
+
+[[bin]]
+name = "drosobot"
+path = "src/main.rs"
+
+[dependencies]

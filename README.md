@@ -56,3 +56,7 @@ PYTHONPATH=src python3 -m drosobot request-idle --supervised
 Não existe neste cliente chamada de marcha, salto ou calibração. Em caso de falha de rede, interrompa o teste; o programa **não garante parada física**. Consulte [protocolo e evidência](docs/esp-hi-http.md).
 
 Testes locais: `PYTHONPATH=src python3 -m unittest discover -s tests -v`. O mesmo conjunto é executado no [GitHub Actions](https://github.com/franklinbaldo/drosobot/actions/workflows/test.yml), sem tentar falar com o robô real.
+
+## Evolução em Rust
+
+O [gateway nativo Rust](rust/drosobot-gateway/) é a direção principal do runtime no IFRO. Ele implementa o mesmo contrato restrito de inspeção e postura ociosa do protótipo Python, sem bibliotecas externas. Consulte [instruções de construção/implantação](docs/rust-gateway.md) e [trilha de firmware experimental](docs/firmware-rust.md). Nenhuma imagem de firmware foi gravada no ESP-Hi.
