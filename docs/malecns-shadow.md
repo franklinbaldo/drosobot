@@ -27,7 +27,7 @@ O script `scripts/prepare_malecns.py` baixa os artefatos públicos, rejeita qual
 ```sh
 python3 scripts/prepare_malecns.py --output .research/malecns-verified
 cargo test --manifest-path rust/drosobot-sim/Cargo.toml --all-targets
-cargo run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin malecns-probe -- .research/malecns-verified/connectome.mcns .research/malecns-verified/ports.txt
+cargo run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin malecns_probe -- .research/malecns-verified/connectome.mcns .research/malecns-verified/ports.txt
 ```
 
 As etapas compiladas são executadas pelo GitHub Actions; não é necessário compilar no IFRO. O artefato do conectoma **não** é anexado ao repositório DrosoBot.
