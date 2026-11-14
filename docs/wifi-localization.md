@@ -30,3 +30,7 @@ O desenho das medições aproveita o contrato RF descrito em [`papers/experiment
 3. Coletar pontos rotulados por região em diferentes dias, posições e orientações. Separar dados de treino e avaliação por período/condição para evitar vazamento.
 4. Medir acurácia por cômodo **incluindo a taxa de abstinência**, erro por confusão, impacto de APs que somem e envelhecimento do ambiente. Não promover como sensor de obstáculos.
 5. Somente alimentar o MaleCNS com regiões estimadas após validar a qualidade e declarar a incerteza. O controle físico exigirá sensores adicionais de obstáculo, queda e watchdog no ESP32-C3.
+
+## O que a rede mesh Tenda pode acrescentar
+
+Em 14/11/2026, o IFRO inspecionou o endpoint UPnP/SOAP do gateway Tenda Nova MW3. Os métodos disponíveis descrevem estado do gateway e mapeamento de portas, **não** RSSI/associação de clientes. A latência da consulta SOAP `GetStatusInfo` foi pequena (mediana de 6,55 ms em 12 tentativas), mas isso não estabelece latência do sensor de localização. O protocolo da aplicação Tenda ainda precisa de investigação autorizada e somente leitura. Consulte [inventário SOAP e limites](tenda-mw3-soap.md).

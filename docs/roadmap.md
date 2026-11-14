@@ -26,3 +26,6 @@
 
 - [x] P4a. Contrato de varredura Wi-Fi em Rust, comparação de fingerprints e abstinência em cenário totalmente sintético.
 - [ ] P4b. Verificar API de medições reais no ESP-Hi; estudo de amostras privadas, holdout temporal e precisão por cômodo.
+
+- [x] P4a. Descobrir serviços UPnP/SOAP reais do gateway Tenda MW3 e medir latência de consulta de estado, sem modificar rede.
+- [ ] P4b. Descobrir, por método autenticado e somente leitura, se a API Tenda WiFi expõe nó associado e/ou RSSI por cliente.
