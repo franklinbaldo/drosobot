@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+**/__pycache__/
+.venv/
+*.db
+*.sqlite*
+logs/
+data/private/
+config/local.env
