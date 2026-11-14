@@ -245,3 +245,6 @@ mod tests {
 
 /// MaleCNS frozen operator: executable only with verified external artifact.
 pub mod malecns;
+
+/// Optional offline radio-fingerprint localization baseline (synthetic fixtures only).
+pub mod wifi;
