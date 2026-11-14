@@ -29,3 +29,6 @@
 
 - [x] P4a. Descobrir serviços UPnP/SOAP reais do gateway Tenda MW3 e medir latência de consulta de estado, sem modificar rede.
 - [ ] P4b. Descobrir, por método autenticado e somente leitura, se a API Tenda WiFi expõe nó associado e/ou RSSI por cliente.
+
+- [x] P4c. Documentar os 18 métodos SOAP, parâmetros esperados, classificação de risco e auditor read-only offline com testes.
+- [ ] P4d. Revalidar assinaturas reais de argumentos de cada método no gateway, executar apenas as consultas permitidas e registrar latência.

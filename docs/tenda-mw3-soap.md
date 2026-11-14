@@ -38,3 +38,7 @@ O SSDP não anunciava serviços `WLANConfiguration` ou equivalentes para mediç�
 - [Tenda MW3 datasheet](https://static.tenda.com.cn/tdeweb/download/MW3/MW3_Datasheet.pdf): UPnP, DHCP client list e Wi-Fi roaming.
 - [Tenda WiFi App User Guide, MW3](https://www.tenda.cz/sites/Upload/MW3/MW3_UG.pdf): mapa dos nós e listagem de clientes na aplicação.
 - [UPnP WANIPConnection service](https://upnp.org/specs/gw/UPnP-gw-WANIPConnection-v2-Service.pdf): semântica de métodos IGD para ligação à Internet e encaminhamento de portas.
+
+## Contrato método por método
+
+Consulte [auditoria dos 18 métodos e ferramenta de descoberta segura](tenda-soap-actions.md). Os nomes foram lidos do SCPD; os parâmetros documentados ainda precisam ser reconferidos com a unidade.
