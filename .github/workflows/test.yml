@@ -38,3 +38,13 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 14
+  rust-simulation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal
+      - name: Synthetic-world unit and closed-loop tests (no hardware)
+        run: cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --all-targets
+      - name: Deterministic baseline demonstration
+        run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml

@@ -1,0 +1,15 @@
+[package]
+name = "drosobot-sim"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Synthetic, no-hardware closed-loop baseline for DrosoBot"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "drosobot-sim"
+path = "src/main.rs"
+
+[dependencies]
