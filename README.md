@@ -35,3 +35,24 @@ Fechar o ciclo `sensores reais -> transdutores documentados -> MaleCNS -> decis�
 ## Primeiros passos
 
 Consulte [arquitetura](docs/architecture.md), [roteiro](docs/roadmap.md) e [segurança](docs/safety.md). Antes de reutilizar código de terceiros, verificar a licença e registrar a proveniência.
+
+## Primeiro canal IFRO → ESP-Hi
+
+Uma implementação Python **sem dependências** consulta os arquivos estáticos da WebUI para verificar presença e compatibilidade com o protocolo conhecido, mas **não inventa telemetria de sensores ou posição das pernas**.
+
+```sh
+# No IFRO, com o repositório clonado; host configurado localmente
+export DROSOBOT_URL='http://SEU_ROBO_LOCAL/'
+PYTHONPATH=src python3 -m drosobot inspect
+```
+
+O único pedido de mudança de estado permitido pela ferramenta é `request-idle`, que usa `/exit_calibration` **somente** após confirmar a assinatura da interface ESP-Hi e exigir confirmação presencial. Ele solicita a postura de descanso/neutralidade; não é uma parada de emergência nem prova que o motor recebeu/executou a ação.
+
+```sh
+# EXCLUSIVAMENTE com o robô à vista, fora do chão ou em local seguro:
+PYTHONPATH=src python3 -m drosobot request-idle --supervised
+```
+
+Não existe neste cliente chamada de marcha, salto ou calibração. Em caso de falha de rede, interrompa o teste; o programa **não garante parada física**. Consulte [protocolo e evidência](docs/esp-hi-http.md).
+
+Testes locais: `PYTHONPATH=src python3 -m unittest discover -s tests -v`.

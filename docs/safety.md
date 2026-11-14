@@ -8,3 +8,6 @@
 6. Dados de rede doméstica, BSSID real, tokens, credenciais e capturas privadas não são publicados.
 7. Nunca inferir posição efetiva das pernas a partir apenas de ângulo comandado.
 8. Alterações de firmware exigem backup, identificação da placa, plano de recuperação e autorização específica.
+
+9. O endpoint HTTP `/exit_calibration` solicita postura `DOG_STATE_IDLE`; ele não é parada de emergência física, nem garante posição efetiva.
+10. `inspect` não faz movimento; `request-idle` exige operador presencial e identidade da WebUI verificada. Não realizar teste real sem essa condição.
