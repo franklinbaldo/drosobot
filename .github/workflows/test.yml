@@ -63,4 +63,4 @@ jobs:
         run: python scripts/prepare_malecns.py --output .research/malecns-verified
       - name: Run frozen MaleCNS shadow observer and target-label null
         run: |
-          cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin malecns-probe -- .research/malecns-verified/connectome.mcns .research/malecns-verified/ports.txt
+          cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin malecns_probe -- .research/malecns-verified/connectome.mcns .research/malecns-verified/ports.txt
