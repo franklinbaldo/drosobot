@@ -60,3 +60,7 @@ Testes locais: `PYTHONPATH=src python3 -m unittest discover -s tests -v`. O mesm
 ## Evolução em Rust
 
 O [gateway nativo Rust](rust/drosobot-gateway/) é a direção principal do runtime no IFRO. Ele implementa o mesmo contrato restrito de inspeção e postura ociosa do protótipo Python, sem bibliotecas externas. Consulte [instruções de construção/implantação](docs/rust-gateway.md) e [trilha de firmware experimental](docs/firmware-rust.md). Nenhuma imagem de firmware foi gravada no ESP-Hi.
+
+## Simulação isolada de navegação (Rust)
+
+O crate [drosobot-sim](rust/drosobot-sim/) oferece um primeiro teste determinístico, totalmente **sintético**, de observação egocêntrica → controlador convencional → árbitro de segurança → ambiente → nova observação. Não simula a mecânica do robô nem afirma executar MaleCNS. O gateway físico não importa esse crate. Consulte [os limites e as métricas do experimento](docs/simulation.md).

@@ -16,3 +16,7 @@
 - [x] P1e-a. Compilar e testar gateway Rust no CI; publicar binário e instalar no IFRO com SHA-256 validado.
 - [ ] P1e-b. Verificar inspeção real no ESP-Hi quando a conexão HTTP local estiver disponível, sem mover robô.
 - [ ] P1f. Inventariar firmware e criar experimento Rust para ESP32-C3 em hardware de testes, sem flashing no robô principal.
+
+- [x] P6a. Criar simulação Rust determinística de malha fechada, sem conexões com hardware e sem informações privilegiadas ao controlador.
+- [ ] P6b. Implementar sensores físicos admissíveis e controladores comparadores com orçamento pareado antes dos experimentos MaleCNS.
+- [ ] P6c. Substituir a observação hipotética de obstáculo frontal por evidência de sensor real ou por uma modalidade explicitamente documentada.
