@@ -1,0 +1,15 @@
+menu "DrosoBot CSI independent receive-only lab"
+    config DROSOBOT_CSI_CHANNEL
+        int "Fixed 2.4 GHz listening channel (match access point manually)"
+        range 1 11
+        default 1
+        help
+            Dedicated standalone ESP32-C3 only. No channel hopping, no association,
+            no router configuration, no frame transmission. Pick actual AP channel.
+    config DROSOBOT_CSI_MAX_WINDOWS
+        int "Number of 1-second aggregate windows before radio stops"
+        range 10 1200
+        default 600
+        help
+            Hard stop after 10 minutes by default. Power cycle for another run.
+endmenu

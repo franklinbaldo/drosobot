@@ -1,0 +1,63 @@
+name: Standalone ESP32-C3 passive CSI firmware
+on:
+  pull_request:
+    paths:
+      - 'firmware/csi-listener/**'
+      - 'experiments/csi_signal/**'
+      - '.github/workflows/csi-firmware.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  csi-python-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate synthetic CSI pipeline and refuse false live origin
+        run: |
+          python3 -m unittest discover -s experiments/csi_signal -p 'test_*.py' -v
+          mkdir -p /tmp/drosobot-csi
+          python3 experiments/csi_signal/generate_fixture.py --output /tmp/drosobot-csi/fixture.txt --seconds 600
+          python3 experiments/csi_signal/analyze.py --input /tmp/drosobot-csi/fixture.txt \
+            --origin synthetic_csi_fixture --output /tmp/drosobot-csi/result.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/drosobot-csi/result.json'))
+          assert x['input_provenance']=='synthetic_csi_fixture'
+          assert x['total_windows_received']==600
+          assert x['complete_radio_stopped'] is True
+          assert x['frames_received']>10000
+          print('Synthetic CSI processing validated without real radio claims')
+          PY
+  csi-esp32c3-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile with official Espressif ESP-IDF 5.5.6 image on CI, not IFRO
+        run: |
+          docker run --rm -v "$PWD/firmware/csi-listener:/project" \
+            -w /project -e HOME=/tmp \
+            espressif/idf:v5.5.6 idf.py set-target esp32c3 build
+          test -s firmware/csi-listener/build/drosobot_csi_listener.bin
+          test -s firmware/csi-listener/build/bootloader/bootloader.bin
+          test -s firmware/csi-listener/build/partition_table/partition-table.bin
+          mkdir -p dist-csi
+          cp firmware/csi-listener/build/drosobot_csi_listener.bin dist-csi/
+          cp firmware/csi-listener/build/bootloader/bootloader.bin dist-csi/
+          cp firmware/csi-listener/build/partition_table/partition-table.bin dist-csi/
+          (cd dist-csi && sha256sum drosobot_csi_listener.bin bootloader.bin partition-table.bin > SHA256SUMS)
+          (cd dist-csi && sha256sum -c SHA256SUMS)
+      - name: Publish unattached binary only, NEVER auto-flash
+        uses: actions/upload-artifact@v4
+        with:
+          name: drosobot-standalone-esp32c3-csi-build
+          path: |
+            dist-csi/drosobot_csi_listener.bin
+            dist-csi/bootloader.bin
+            dist-csi/partition-table.bin
+            dist-csi/SHA256SUMS
+          retention-days: 14
+          if-no-files-found: error
