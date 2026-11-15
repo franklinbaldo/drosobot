@@ -51,3 +51,6 @@
 
 - [x] P9j-a. Implementar receptor web read-only do registro Embree/DPH1 com SSE, replay, injeção de perdas sintéticas, Canvas2D e medição RTT HTTP no navegador, sem acessar Tenda ou motores.
 - [ ] P9j-b. Publicar sessão no IFRO em porta privada com isolamento systemd; verificar conectividade e latência a partir de um **segundo dispositivo real na Tenda**, sem usar o próprio IFRO como substituto.
+
+- [x] P9k-a. Implementar laboratório de comportamento com sensor de alcance Embree 4, movimento cinemático 2D limitado, RSSI fictício, perdas, atraso e luz perturbada, por 600 segundos reais no IFRO.
+- [ ] P9k-b. Calibrar sensor e física dos servos a partir de medições reais supervisionadas; integrar com segurança o MaleCNS em shadow mode e eventos DPH1 no controle virtual.
