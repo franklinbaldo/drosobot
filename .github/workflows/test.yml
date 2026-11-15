@@ -133,6 +133,26 @@ jobs:
           assert report['benchmark']['native_embree_3ray_calls']==1800
           print('Nomos synthetic CI arms validated; no real mesh precision claim')
           PY
+      - name: Nomos matched-budget active ray control (synthetic CI fixture)
+        run: |
+          python3 -m unittest discover -s experiments/spatial_inference/matched_control -p 'test_*.py' -v
+          python3 experiments/spatial_inference/matched_control/experiment.py \
+            --network-snapshot experiments/spatial_inference/matched_control/test-latency-fixture.json \
+            --test-fixture-network --embree-oracle dist-embree/embree_angles \
+            --seconds 30 --particles 48 --output dist-embree/nomos-matched-fixture.json
+          python3 - <<'PYTEST'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('dist-embree/nomos-matched-fixture.json').read_text())
+          assert x['real_network']['source']=='synthetic_test_fixture'
+          assert x['radio_measurements_real'] is False
+          a=x['metrics']
+          assert a['C_uniform_extra']['extra_synthetic_sensor_rays']==30
+          assert a['D_active_virtual_rays']['extra_synthetic_sensor_rays']==30
+          assert a['D_active_virtual_rays']['virtual_predicted_rays']>0
+          assert all(z['new_real_world_measurements']==0 for z in a.values())
+          print('Nomos active-vs-uniform matched observation budget PASS')
+          PYTEST
       - name: End-to-end Embree rays to DPH1 to reconstructed scene
         run: |
           dist-embree/embree_photon_events --output dist-embree/source_journal.dph1
