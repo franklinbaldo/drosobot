@@ -52,6 +52,18 @@ jobs:
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin wifi_demo
       - name: Virtual photon field reconstruction and replay (no hardware)
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_field_demo
+      - name: Package photon lab binary from CI
+        run: |
+          mkdir -p dist-photon
+          cp rust/drosobot-sim/target/release/photon_field_demo dist-photon/
+          sha256sum dist-photon/photon_field_demo > dist-photon/SHA256SUMS
+      - name: Publish photon lab artifact (IFRO, no local compile)
+        uses: actions/upload-artifact@v4
+        with:
+          name: drosobot-photon-lab-linux-amd64
+          path: dist-photon/
+          if-no-files-found: error
+          retention-days: 14
   malecns-shadow:
     runs-on: ubuntu-24.04
     steps:
