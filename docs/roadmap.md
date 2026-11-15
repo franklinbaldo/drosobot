@@ -45,3 +45,6 @@
 
 - [x] P9g. Medir compatibilidade real do IFRO: Mitsuba 3.9.1 SIGILL; Embree 4.3.3 CPU SSE4.2 aprovado, benchmark primário e difuso com cinco repetições e código reproduzível.
 - [ ] P9h. Expor Embree via ABI C/Rust segura para geração de eventos de fótons e medir consumo de banda antes da transmissão pela mesh.
+
+- [x] P9i. Gerar eventos DPH1 a partir de interseções reais Embree 4 no IFRO e construir receptor/evaluador Rust com corpus sintético, sem I/O de rede ou motor.
+- [ ] P9j. Integrar transporte local IFRO → receptor independente em celular/Tenda Mesh com limite de taxa, medição de latência, segurança e replay.

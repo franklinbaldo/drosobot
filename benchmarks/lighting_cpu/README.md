@@ -46,3 +46,7 @@ No IFRO, o isolamento persistente do proprietário foi feito em `/var/lib/drosob
 - Testar geometria estática e depois dinâmica; medir também CPU/RAM, latência de ponta a ponta da rede, tamanho do pacote e perda.
 - Velocidade de interseção/s **não** equivale a qualidade fotorealista, ray/path/s de GPU moderna ou número de eventos que o Wi-Fi consegue distribuir.
 - Para física completa, usar um renderizador de referência em executor externo (Mitsuba ou PBRT). O benchmark do IFRO informa a viabilidade de um integrador **leve** baseado em Embree; não prova que ele é o renderer universalmente mais rápido em 2026.
+
+## Integração com o protocolo DPH1
+
+O binário `embree_photon_events.cpp` usa `rtcIntersect1` para a **primeira colisão 3D** de oito trajetórias definidas em coordenadas inteiras de milímetros e produz 17 registros `DPH1` em arquivo 0600. O receptor Rust `photon_embree_ingest` valida o layout e compara resultados com o laboratório sintético. Ver [`docs/embree-photon-bridge.md`](../../docs/embree-photon-bridge.md). Não converter esses 17 registros em pretensão de renderização 3D completa ou fonte de dados física da residência.
