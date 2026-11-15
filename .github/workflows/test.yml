@@ -20,6 +20,39 @@ jobs:
         run: python -m unittest discover -s experiments/photon_mesh_web -p 'test_*.py' -v
       - name: Check browser receiver JavaScript
         run: node --check experiments/photon_mesh_web/app.js
+  esp32c3-csi-observer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate no configured Wi-Fi credentials in source
+        run: |
+          grep -F 'DROSOBOT_UNCONFIGURED' firmware/csi-observer/sdkconfig.defaults
+          test ! -f firmware/csi-observer/sdkconfig
+          ! grep -R -E 'ssid.*(home|tenda|mesh)' firmware/csi-observer/sdkconfig.defaults
+      - name: Build unconfigured ESP32-C3 firmware without flashing
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.6
+          target: esp32c3
+          path: firmware/csi-observer
+      - name: Verify inert build output without publishing credentials
+        run: |
+          test -s firmware/csi-observer/build/drosobot_csi_observer.bin
+          grep -F 'DROSOBOT_UNCONFIGURED' firmware/csi-observer/build/config/sdkconfig.h
+  csi-feature-analysis:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Unit tests for CSI feature-only serial contract
+        run: python -m unittest discover -s experiments/csi_lab -p 'test_*.py' -v
+      - name: Analyze explicitly synthetic CSI fixture
+        run: |
+          python experiments/csi_lab/generate_fixture.py --output /tmp/drosobot-csi-fake.csv --seconds 600
+          python experiments/csi_lab/analyze.py --input /tmp/drosobot-csi-fake.csv --source synthetic_fixture --limit-seconds 600 --output /tmp/drosobot-csi-fake.json
+          python -c "import json;d=json.load(open('/tmp/drosobot-csi-fake.json'));assert d['source']=='synthetic_fixture' and d['positioning_claim']=='NONE' and d['windows']==600"
   rust-gateway:
     runs-on: ubuntu-24.04
     steps:

@@ -1,0 +1,9 @@
+# Never commit Wi-Fi credentials. Only blank placeholder defaults are tracked.
+/sdkconfig
+/sdkconfig.old
+/build/
+/managed_components/
+/dependencies.lock
+*.bin
+*.elf
+*.map
