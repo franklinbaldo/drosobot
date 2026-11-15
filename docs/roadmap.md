@@ -54,3 +54,6 @@
 
 - [x] P9k-a. Implementar laboratório de comportamento com sensor de alcance Embree 4, movimento cinemático 2D limitado, RSSI fictício, perdas, atraso e luz perturbada, por 600 segundos reais no IFRO.
 - [ ] P9k-b. Calibrar sensor e física dos servos a partir de medições reais supervisionadas; integrar com segurança o MaleCNS em shadow mode e eventos DPH1 no controle virtual.
+
+- [x] P9l-a. Integrar sensor Embree direcional e comparar localização no mapa fixo entre A odometria, B + mapa/raios, C + emissores cooperativos sintéticos, D + seleção ativa de fótons; registrar RTT ICMP da Tenda real em canal separado, sem convertê-lo em metros.
+- [ ] P9l-b. Incorporar mapa residencial medido, coordenadas reais dos nós e sensores autorizados; medir precisão com ground truth e abstenção fora da área calibrada.

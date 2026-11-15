@@ -103,6 +103,36 @@ jobs:
             --log dist-embree/behavior-smoke.jsonl \
             --output dist-embree/behavior-smoke.html
           python3 -c "from pathlib import Path; import json; d=json.loads(Path('dist-embree/behavior-smoke.json').read_text()); assert d['ticks']==100 and d['paced_realtime'] is False; assert Path('dist-embree/behavior-smoke.html').stat().st_size>3000; print('Synthetic behavior smoke PASS')"
+      - name: Nomos A/B/C/D map localization with synthetic network fixture (no real IP)
+        run: |
+          python3 -m unittest discover -s experiments/spatial_inference -p 'test_*.py' -v
+          python3 -m compileall -q experiments/spatial_inference
+          g++ -std=c++17 -O2 -DNDEBUG -march=x86-64 \
+            experiments/spatial_inference/embree_angles.cpp -lembree4 \
+            -o dist-embree/embree_angles
+          python3 -u experiments/behavior_lab/run.py \
+            --sensor dist-embree/embree_sensor \
+            --output dist-embree/nomos-synthetic-truth.json \
+            --duration 600 --fast
+          python3 experiments/spatial_inference/compare.py \
+            --truth dist-embree/nomos-synthetic-truth.jsonl \
+            --network experiments/spatial_inference/test-network-fixture.json \
+            --test-fixture-network \
+            --embree-oracle dist-embree/embree_angles --particles 64 \
+            --output dist-embree/nomos-fixture-report.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('dist-embree/nomos-fixture-report.json').read_text())
+          assert report['network']['source']=='synthetic_test_fixture'
+          assert report['network']['not_spatial_ranging'] is True
+          assert report['network']['live_client_positions_known'] is False
+          assert report['comparability']['B_C_D_ray_queries_per_second']==3
+          assert all(report['metrics'][arm]['observed_ray_samples']==1800 for arm in 'BCD')
+          assert report['metrics']['A']['observed_ray_samples']==0
+          assert report['benchmark']['native_embree_3ray_calls']==1800
+          print('Nomos synthetic CI arms validated; no real mesh precision claim')
+          PY
       - name: End-to-end Embree rays to DPH1 to reconstructed scene
         run: |
           dist-embree/embree_photon_events --output dist-embree/source_journal.dph1
