@@ -1,10 +1,14 @@
 """Deterministic unit checks, no hardware, Embree or network required."""
+import base64
+import json
+from tempfile import TemporaryDirectory
 import math
 from pathlib import Path
 import random
 import sys
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report import generate
 from run import (Agent, RADIUS_M, V_MAX_M_S, circle_rect_intersect,
                  controller, fake_wifi_location, free, scenario, step_physics)
 
@@ -42,6 +46,25 @@ class ModelTests(unittest.TestCase):
         a=Agent('cautious')
         self.assertGreater(controller(a,(4,4,4,.1),0,'cautious',0)[0],0)
         self.assertGreater(abs(controller(a,(.2,1,3,.1),0,'cautious',0)[1]),0)
+
+    def test_compact_offline_visualization_encodes_only_pose(self):
+        with TemporaryDirectory() as base:
+            root=Path(base)
+            summary=root/'summary.json';log=root/'trace.jsonl';out=root/'viewer.html'
+            summary.write_text(json.dumps({'kind':'synthetic_embree_behavior_10min',
+                'ticks':20,'wall_seconds':2,'scene':{'rectangles_m':[[2,2,4,4]]},'metrics':{}}))
+            records=[{'tick':i*10,'agents':[{'pose_truth_for_evaluator':[1.234+i,2.2,0.12]},
+                {'pose_truth_for_evaluator':[1.1,3.4,-1.2]}]} for i in range(2)]
+            log.write_text('\n'.join(json.dumps(r) for r in records)+'\n')
+            result=generate(summary,log,out)
+            self.assertEqual(result['frames'],2)
+            doc=out.read_text()
+            encoded=doc.split('<script id="data" type="application/json">')[1].split('</script>')[0]
+            decoded=json.loads(encoded)
+            self.assertEqual(len(base64.b64decode(decoded['positions_base64'])),24)
+            self.assertNotIn('pose_truth_for_evaluator\":',encoded)
+            self.assertTrue(result['bytes']<20000)
+            with self.assertRaises(ValueError):generate(summary,log,out)
 
     def test_fake_wifi_is_repeatable_but_can_abstain(self):
         a=random.Random(27);b=random.Random(27)
