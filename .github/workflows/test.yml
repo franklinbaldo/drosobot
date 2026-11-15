@@ -16,6 +16,10 @@ jobs:
         run: PYTHONPATH=src python -m unittest discover -s tests -v
       - name: Compile Python source
         run: python -m compileall -q src tests
+      - name: Browser photon lab protocol and HTTP tests (loopback only)
+        run: python -m unittest discover -s experiments/photon_mesh_web -p 'test_*.py' -v
+      - name: Check browser receiver JavaScript
+        run: node --check experiments/photon_mesh_web/app.js
   rust-gateway:
     runs-on: ubuntu-24.04
     steps:
@@ -88,6 +92,7 @@ jobs:
           dist-embree/embree_photon_events --output dist-embree/source_journal.dph1
           test "$(wc -c < dist-embree/source_journal.dph1)" = 712
           dist-embree/photon_embree_ingest --input dist-embree/source_journal.dph1
+          python3 -c "import sys; sys.path.insert(0, 'experiments/photon_mesh_web'); from server import decode_packets; from pathlib import Path; packets=decode_packets(Path('dist-embree/source_journal.dph1').read_bytes()); assert len(packets)==17; print('Web SSE decoder compatible with actual Embree journal')"
           python3 -c "from pathlib import Path; b=Path('dist-embree/source_journal.dph1').read_bytes(); assert b.startswith(b'DPH1'); b=bytearray(b);b[23]^=1;Path('dist-embree/tampered_journal.dph1').write_bytes(b)"
           if dist-embree/photon_embree_ingest --input dist-embree/tampered_journal.dph1; then
             echo 'ERROR: Tampered event journal unexpectedly passed verification'
