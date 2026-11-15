@@ -39,3 +39,6 @@
 - [ ] P9b. Retirar rótulos semânticos privilegiados dos contatos, introduzir clustering e snapshots compactados com testes de observabilidade.
 - [ ] P9c. Transportar eventos de forma autenticada sobre LAN/mesh real com medidas de atraso, incerteza de relógio e perdas, isolado de controle motor.
 - [ ] P9d. Validar como transduzir evidência geométrica/espacial real em sinais egocêntricos MaleCNS, com baselines e nulls.
+
+- [x] P9e. Selecionar renderer físico de referência para fótons virtuais: Mitsuba 3 offline; manter Rust como codec/transporte e wgpu opcional para visualização, sem exigir RTX ou mudar a rede. Ver `docs/lighting-engine-decision.md`.
+- [ ] P9f. Integrar cena física de referência com Mitsuba 3 em executor externo e comparar emissões/contatos/energia por distribuição, não por identidade de amostra Monte Carlo.
