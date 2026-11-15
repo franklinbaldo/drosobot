@@ -11,7 +11,7 @@ ROOT=Path(__file__).parent
 sys.path.insert(0,str(ROOT))
 from compare import (Filter,PARTICLES,UNIFORM_ANGLES,physical_map,ray_range,
                      valid,moving_emitters,mobile_observations,validate_snapshot,
-                     weighted_mean,uncertainty_radius90)
+                     weighted_mean,uncertainty_radius90,set_map_prior)
 from collect_network import save_json_atomic
 
 class InferenceTests(unittest.TestCase):
@@ -33,6 +33,15 @@ class InferenceTests(unittest.TestCase):
         self.assertTrue(all(x in (-1.5,-1.15,-.78,-.4,0.,.4,.78,1.15,1.5) for x in selected))
         self.assertEqual(f.total_sensed_rays,0)
         self.assertEqual(Filter('C',count=96).choose_angles(),UNIFORM_ANGLES)
+
+    def test_stale_static_map_can_be_made_incomplete_without_changing_oracle(self):
+        set_map_prior('missing_one_obstacle')
+        try:
+            self.assertEqual(len(physical_map()['fixtures']),1)
+            self.assertAlmostEqual(ray_range(5,5,0),4,places=2)
+        finally:
+            set_map_prior('complete')
+        self.assertEqual(len(physical_map()['fixtures']),2)
 
     def test_mobile_emitter_positions_move_and_are_fictional(self):
         self.assertNotEqual(moving_emitters(0),moving_emitters(100))

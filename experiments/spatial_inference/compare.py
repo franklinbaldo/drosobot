@@ -10,9 +10,7 @@ reliable movement detection. Never convert ICMP RTT to distance.
 """
 from __future__ import annotations
 import argparse
-from collections import defaultdict
 from dataclasses import dataclass
-import hashlib
 import json
 import math
 import os
@@ -28,12 +26,18 @@ CANDIDATE_ANGLES=(-1.5,-1.15,-.78,-.4,0.,.4,.78,1.15,1.5)
 UNIFORM_ANGLES=(-.78,0.,.78)
 WALLS=(0.,0.,10.,8.)
 FIXTURES=((2.,2.,4.,4.),(6.,4.,8.,6.))
+FULL_FIXTURES=FIXTURES
 PARTICLES=128
 SMALL=1e-12
 
+def set_map_prior(name):
+    """Single-process stress test: never change the Embree truth geometry."""
+    global FIXTURES
+    if name=='complete':FIXTURES=FULL_FIXTURES
+    elif name=='missing_one_obstacle':FIXTURES=FULL_FIXTURES[:1]
+    else:raise ValueError('Unknown structural-map prior')
 
 def wrap(angle):return (angle+PI)%(2*PI)-PI
-
 
 def physical_map():
     return {'kind':'SYNTHETIC_NO_HOME_FLOORPLAN',
@@ -45,14 +49,11 @@ def physical_map():
             'mobile_emitters':'two_cooperative_simulated_trajectories',
             'mesh_node_coordinates':'unavailable_do_not_infer'}
 
-
 def valid(x,y):
     if not .2<x<9.8 or not .2<y<7.8:return False
     return all(not (a-.13<x<c+.13 and b-.13<y<d+.13) for a,b,c,d in FIXTURES)
 
-
 def ray_range(x,y,angle):
-    # Same first-hit geometry and 4m maximum as the native Embree oracle.
     dx,dy=math.cos(angle),math.sin(angle)
     best=RAY_RANGE
     for px in (WALLS[0],WALLS[2]):
@@ -73,7 +74,6 @@ def ray_range(x,y,angle):
             t=(edge-y)/dy
             if .001<t<best and a-1e-7<=x+t*dx<=c+1e-7:best=t
     return best
-
 
 class EmbreeAngles:
     def __init__(self,exe:Path):
@@ -100,13 +100,11 @@ class EmbreeAngles:
             except subprocess.TimeoutExpired:self.p.kill()
         self.p.stdin.close();self.p.stdout.close()
 
-
 @dataclass
 class Particle:
     x:float
     y:float
     theta:float
-
 
 def init_particles(count,seed):
     r=random.Random(seed)
@@ -115,7 +113,6 @@ def init_particles(count,seed):
         x,y=r.gauss(1.65,.90),r.gauss(1.6,.90)
         if valid(x,y):arr.append(Particle(x,y,wrap(r.gauss(.12,.58))))
     return arr
-
 
 def weighted_mean(particles,weights):
     x=sum(p.x*w for p,w in zip(particles,weights))
@@ -126,11 +123,8 @@ def weighted_mean(particles,weights):
     variance=sum(w*((p.x-x)**2+(p.y-y)**2) for p,w in zip(particles,weights))
     return mean,max(variance,1e-5)
 
-
 def uncertainty_radius90(variance):
-    # Heuristic circular Gaussian 90%-mass radius, not verified calibration.
     return math.sqrt(-math.log(.1)*variance)
-
 
 def systematic_resample(particles,weights,rng):
     n=len(particles)
@@ -142,7 +136,6 @@ def systematic_resample(particles,weights,rng):
         p=particles[i]
         out.append(Particle(p.x,p.y,p.theta))
     return out
-
 
 class Filter:
     def __init__(self,mode:str,seed=42,count=PARTICLES):
@@ -162,13 +155,10 @@ class Filter:
             nx=p.x+distance*math.cos(heading)
             ny=p.y+distance*math.sin(heading)
             if self.mode!='A' and not valid(nx,ny):
-                # Static map constraints, NOT a true-pose oracle.
                 nx,ny=p.x,p.y
             p.x,p.y,p.theta=nx,ny,heading
     def choose_angles(self):
         if self.mode!='D':return UNIFORM_ANGLES
-        # Active prediction: pick directions maximizing predicted variation of
-        # distances under current *particle beliefs*, before querying truth.
         scored=[]
         sample=self.particles[::max(1,len(self.particles)//40)]
         self.virtual_candidate_rays+=len(sample)*len(CANDIDATE_ANGLES)
@@ -221,24 +211,24 @@ class Filter:
         (x,y,theta),v=weighted_mean(self.particles,self.weights)
         return x,y,theta,uncertainty_radius90(v)
 
-
 def moving_emitters(second):
     t=second
-    # Two fictional cooperative devices. Their reported location is noisy.
     return ((2.3+.8*math.sin(t*.018),6.1+.7*math.cos(t*.018)),
             (7.7+.8*math.sin(t*.013+1.5),2.+.5*math.cos(t*.013+1.5)))
 
-
-def mobile_observations(true_pose,second,rng):
+def mobile_observations(true_pose,second,rng,age_upper_bounds_s=(0.,0.)):
     observations=[]
-    for true_x,true_y in moving_emitters(second):
-        advertised_x=true_x+rng.gauss(0,.18)
-        advertised_y=true_y+rng.gauss(0,.18)
+    for index,(true_x,true_y) in enumerate(moving_emitters(second)):
+        # Use one measured ICMP RTT as a deliberately conservative upper bound
+        # for staleness of a FICTIONAL beacon's advertised pose. This is NOT
+        # the measured one-way delay of a Wi-Fi beacon or a radio distance.
+        stale_x,stale_y=moving_emitters(second-age_upper_bounds_s[index])[index]
+        advertised_x=stale_x+rng.gauss(0,.18)
+        advertised_y=stale_y+rng.gauss(0,.18)
         distance=max(.6,math.hypot(true_pose[0]-true_x,true_pose[1]-true_y))
         rssi=-42.-30.*math.log10(distance)+rng.gauss(0,4.)
         observations.append((advertised_x,advertised_y,rssi))
     return observations
-
 
 def validate_snapshot(snapshot,allow_test_fixture=False):
     kind=snapshot.get('source')
@@ -255,7 +245,6 @@ def validate_snapshot(snapshot,allow_test_fixture=False):
         if any(not 0<=v<=5000 for v in info['rtt_samples_ms']):raise ValueError('Invalid RTT')
     return snapshot
 
-
 def read_truth(path:Path):
     frames=[json.loads(line) for line in path.read_text().splitlines()]
     if len(frames)!=600 or any(f['tick']!=10*i for i,f in enumerate(frames)):
@@ -265,34 +254,36 @@ def read_truth(path:Path):
         raise ValueError('Truth outside declared static world')
     return poses
 
-
 def experiment(truth,oracle,network,seed=20261115,count=PARTICLES,allow_test_fixture=False):
     assert len(truth)==600
     network=validate_snapshot(network,allow_test_fixture=allow_test_fixture)
     rng=random.Random(seed)
     filters={arm:Filter(arm,seed=2026,count=count) for arm in 'ABCD'}
     recorded={arm:[] for arm in 'ABCD'}
-    node_samples=[value for node in network['nodes'].values() for value in node['rtt_samples_ms']]
-    if not node_samples:raise ValueError('No real RTT samples')
+    node_samples=[v for node in network['nodes'].values() for v in node['rtt_samples_ms']]
+    if not node_samples:raise ValueError('No RTT observations')
     time_replay=[]
     for second,pose in enumerate(truth):
         if second:
             prev=truth[second-1]
             ds=math.dist(pose[:2],prev[:2])
             dyaw=wrap(pose[2]-prev[2])
-            # One imperfect relative odometer reading shared by all arms.
             odom_dist=max(0.,ds+rng.gauss(0,.012))
             odom_turn=dyaw+rng.gauss(0,.018)
             for f in filters.values():f.advance(odom_dist,odom_turn)
-        # Same virtual RF observations and real RTT replay in C,D.
         rtt_ms=node_samples[second%len(node_samples)]
         time_replay.append(rtt_ms)
-        beacons=mobile_observations(pose,second,rng)
+        replay_ages=[]
+        for alias in ('gateway','mesh_peer'):
+            series=network['nodes'].get(alias,{}).get('rtt_samples_ms',[])
+            replay_ages.append(series[second%len(series)]/1000. if series else None)
+        candidates=mobile_observations(pose,second,rng,
+            tuple(age or 0. for age in replay_ages))
+        beacons=[v for v,age in zip(candidates,replay_ages) if age is not None]
         for arm,filt in filters.items():
             if arm!='A':
                 angles=filt.choose_angles()
                 truth_ranges=oracle.get(pose,angles)  # independent Embree 3-D oracle
-                # Modelled range noise is identical when angle/time match.
                 values=[]
                 for angle,v in zip(angles,truth_ranges):
                     arng=random.Random(seed+second*1009+round(angle*1000)*31)
@@ -327,6 +318,7 @@ def experiment(truth,oracle,network,seed=20261115,count=PARTICLES,allow_test_fix
     summary={'kind':'nomos_four_arm_synthetic_truth_with_real_network_timing',
          'seed':seed,'duration_simulated_seconds':600,'input_truth':'previous_IFRO_10min_synthetic_trajectory',
          'source_oracle':'Embree4_3D_range_truth_fixed_3_rays_per_arm_second',
+         'map_prior_scenario': 'complete' if len(FIXTURES)==2 else 'missing_one_obstacle',
          'model':physical_map(),
          'arms':{'A':'relative_odometry_only_no_absolute_map',
                  'B':'known_fixed_map_and_three_uniform_Embree_ray_observations',
@@ -342,7 +334,9 @@ def experiment(truth,oracle,network,seed=20261115,count=PARTICLES,allow_test_fix
                     'not_spatial_ranging':True,
                     'replay_timing_is_not_live_phone_or_simultaneous_with_virtual_walk':True,
                     'node_coordinates_known':False,'live_client_positions_known':False,
-                    'mobile_emitters_real':False},
+                    'mobile_emitters_real':False,
+                    'latency_influence':'full measured ICMP RTT reused only as conservative synthetic beacon pose staleness stress',
+                    'real_packet_presence_controls_which_simulated_cooperative_links_can_be_replayed':True},
          'comparability':{'same_truth_trajectory':True,'same_initial_particles':True,
              'same_odometry_noise':True,'B_C_D_ray_queries_per_second':3,
              'C_D_same_synthetic_RF_observations':True,
@@ -351,7 +345,7 @@ def experiment(truth,oracle,network,seed=20261115,count=PARTICLES,allow_test_fix
              'real_ICMP_RTT_is_observed_telemetry_only_not_a_position_factor':True},
          'metrics':metrics,
          'limitations':[
-           'Real ICMP packet RTT does not give distance/angles/mesh anchors; replayed only as timing context',
+           'Real ICMP packet RTT does not give distance/angles/mesh anchors; reused solely as a beacon-age upper-bound stress proxy',
            'Fixed map is fictional and oracle truth geometrically matches it by construction',
            'Moving beacons self-report fictional approximate coordinates and emit synthesized RSSI',
            'Repeated virtual rays without new real sensor readings cannot improve knowledge of a real house',
@@ -361,13 +355,11 @@ def experiment(truth,oracle,network,seed=20261115,count=PARTICLES,allow_test_fix
            'MaleCNS and real motors not used']}
     return summary,recorded
 
-
 def save(path,data):
     if path.exists() or path.is_symlink():raise FileExistsError('No overwrite')
     path.parent.mkdir(parents=True,exist_ok=True)
     fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
     with os.fdopen(fd,'w') as f:json.dump(data,f,indent=2,ensure_ascii=False);f.write('\n')
-
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
@@ -377,11 +369,13 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--particles',type=int,default=PARTICLES)
     p.add_argument('--seed',type=int,default=20261115)
+    p.add_argument('--map-prior',choices=('complete','missing_one_obstacle'),default='complete')
     p.add_argument('--test-fixture-network',action='store_true',help='CI only: accept explicitly synthetic RTT fixture')
     args=p.parse_args()
     if not 32<=args.particles<=384:p.error('Particle count outside 32..384')
     network=validate_snapshot(json.loads(args.network.read_text()),allow_test_fixture=args.test_fixture_network)
     truth=read_truth(args.truth)
+    set_map_prior(args.map_prior)
     oracle=EmbreeAngles(args.embree_oracle)
     start=time.monotonic()
     try:summary,traces=experiment(truth,oracle,network,seed=args.seed,count=args.particles,allow_test_fixture=args.test_fixture_network)
@@ -391,7 +385,6 @@ def main():
                           'native_embree_3ray_calls':oracle.calls,
                           'particle_count_per_arm':args.particles}
     save(args.output,summary)
-    # Output only aggregate per-minute data as the public artifact.
     for arm in 'ABCD':
         print(arm,'mean_error_m',summary['metrics'][arm]['mean_error_m'],
               'p90_error_m',summary['metrics'][arm]['p90_error_m'],

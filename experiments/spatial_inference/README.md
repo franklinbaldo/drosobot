@@ -27,7 +27,7 @@ O componente **real da rede** é uma coleta ICMP *somente leitura* feita no IFRO
 | C | B + duas transmissões fictícias de emissores móveis **cooperativos** com coordenadas anunciadas ruidosas e RSSI **sintético** |
 | D | C + **3 observações de alcance selecionadas ativamente** por maior dispersão prevista dos raios entre partículas; mesmas 3 observações físicas virtuais por segundo |
 
-Todos os braços utilizam a **mesma trajetória verdadeira sintética**, a mesma leitura de odometria relativa ruidosa, o mesmo conjunto inicial de partículas, o mesmo mapa disponível quando aplicável e o mesmo número de observações reais virtuais B/C/D. O braço D executa **simulações internas adicionais** para selecionar as melhores direções, o que custa CPU, mas essas simulações **não contam como nova informação empírica**. C e D recebem as mesmas observações fictícias de rádio.
+Todos os braços utilizam a **mesma trajetória verdadeira sintética**, a mesma leitura de odometria relativa ruidosa, o mesmo conjunto inicial de partículas, o mesmo mapa disponível quando aplicável e o mesmo número de observações reais virtuais B/C/D. O braço D executa **232.200 raios virtuais de previsão interna** (128 partículas, amostra de 43 partículas e 9 direções candidatas por segundo) para selecionar as melhores direções. Esse custo de CPU adicional **não conta como informação empírica nova**. C e D recebem as mesmas observações fictícias de rádio.
 
 Uma **observação de alcance** vem de três raios reais computados em Embree no cenário fictício, com ruído simulado de 7 cm. O `compare.py` usa um traçador geométrico 2D analítico exclusivamente na etapa de **previsão das partículas**, e a verdade vem de `embree_angles.cpp` via IPC. O alinhamento geométrico foi verificado com 450 raycasts randomizados no IFRO (erro máximo de distância de aproximadamente 0,000012 m).
 
@@ -37,11 +37,11 @@ O filtro usa 128 partículas por braço, validação geométrica, ponderação r
 
 Na primeira execução (seed 20261115) o erro espacial médio da localização **sintética** foi:
 
-- A: 1,659 m; B: 0,0672 m; C: 0,0665 m; D: 0,0507 m.
+- A: 1,659 m; B: 0,0672 m; C: 0,0658 m; D: 0,0528 m.
 - B/C/D receberam 1.800 observações de alcance por braço, em 600 segundos de trajetória. C/D receberam 1.200 emissões móveis fictícias por braço.
 - A estratégia ativa D gastou também raios de **simulação de hipóteses** para escolher as direções; são cálculos sobre crenças, não novas observações.
 
-Quatro sementes adicionais (1701–1704) reproduziram o padrão: a **mediana entre cinco execuções** foi A 1,8905 m; B 0,0610 m; C 0,0603 m; D 0,0499 m. D reduziu o erro médio de 16,4% a 23,8% em relação a C nesses cinco testes, **sob condições muito favoráveis de mapa e sensores**. Os emissores móveis não acrescentaram benefício consistente além de B neste caso, porque o mapa e os raios ópticos já restringem bastante a posição. Não escolher parâmetros apenas para fabricar uma melhoria artificial em C.
+Quatro sementes adicionais (1701–1704) reproduziram o padrão: a **mediana entre cinco execuções** foi A 1,8905 m; B 0,0610 m; C 0,0607 m; D 0,0515 m. D reduziu o erro médio de 12,5% a 21,4% em relação a C nesses cinco testes, **sob condições muito favoráveis de mapa e sensores**. Os emissores móveis não acrescentaram benefício consistente além de B neste caso, porque o mapa e os raios ópticos já restringem bastante a posição. Não escolher parâmetros apenas para fabricar uma melhoria artificial em C.
 
 Essas precisões centimétricas **não devem ser anunciadas como alcançáveis pela Tenda ou pelo DrosoBot físico**. O oráculo Embree fornece medições sintéticas de distância que **não comprovamos que o ESP-Hi possa realizar**; a geometria do ambiente é perfeita por construção; os emissores móveis transmitem coordenadas fictícias; paredes reais, interferência Wi-Fi, não linha-de-visada, deriva e sensores ópticos de verdade podem gerar erros muito maiores.
 
@@ -84,7 +84,11 @@ python3 experiments/spatial_inference/compare.py \
   --output /DIRETORIO_PRIVADO/resultados.json
 ```
 
-O tempo real entre ICMPs aparece **separado nas métricas**, como evidência de rede e capacidade de fornecer dados oportunamente. **Não influencia as coordenadas estimadas**, porque isso exigiria um modelo de sensor de localização que não temos. O experimento A–D é reproduzido em segundos de processamento usando a gravação de uma simulação de 10 minutos, não executa outra caminhada de 600 segundos de relógio. Não controla robôs.
+Os tempos de ICMP aparecem **separados nas métricas**, como evidência de rede. No estresse temporal opcional, seu RTT é reutilizado como **proxy conservador e artificial da idade** das coordenadas que os emissores fictícios alegariam transmitir. Não é medição de atraso unilateral de um beacon real, não equivale a um alcance Wi-Fi e não prova localização. Essa pequena perturbação de idade pode alterar o resultado de C/D, mas a informação espacial permanece **100% sintética**. O experimento A–D é reproduzido em segundos de processamento usando a gravação de uma simulação de 10 minutos, não executa outra caminhada de 600 segundos de relógio. Não controla robôs.
+
+## Controle negativo com prior estrutural incompleto
+
+No mesmo caminho e seed 20261115, ocultar do filtro o segundo obstáculo (mantendo-o no Embree) alterou o erro médio **B: 6,72 → 7,80 cm**, **C: 6,58 → 6,96 cm**, **D: 5,28 → 5,20 cm**. Essa diferença é modesta: um mapa omitindo apenas esse objeto não representou uma perturbação suficientemente desafiadora para todos os braços. Não tratar a estabilidade de D como prova de robustez contra plantas reais incorretas.
 
 ## Próximo ganho de informação
 
@@ -92,3 +96,11 @@ O tempo real entre ICMPs aparece **separado nas métricas**, como evidência de 
 2. Acessar legitimamente dados de cliente/associação/RSSI, ou obter sensores reais do robô e medir posições verdadeiras de referência. Não presumir que antenas comuns fornecem alcances simultâneos.
 3. Repetir curvas de precisão no tempo, com holdout espacial/temporal e teste do que ocorre se o mapa estrutural estiver errado ou a porta mudar de estado.
 4. Retirar IDs semânticos do transporte de fótons e medir contribuição real de observações novas, distinguindo planejamento interno de nova informação externa.
+
+## Controle negativo: mapa estrutural errado
+
+O CLI inclui `--map-prior missing_one_obstacle`, que **oculta somente do
+estimador** o segundo obstáculo enquanto preserva sua presença no oráculo real
+Embree. Isso mede o risco de tratar um mapa estrutural desatualizado como verdade.
+Resultados desse controle são relatados separadamente dos quatro braços sob
+mapa correto. `--map-prior complete` é o padrão.
