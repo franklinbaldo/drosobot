@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Laboratório sintético de fótons virtuais do DrosoBot, distribuído pelo IFRO">
+  <title>DrosoBot | Campo de fótons</title>
+  <link rel="stylesheet" href="/style.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <main>
+    <header class="mast">
+      <div class="eyebrow">DROSOBOT / LABORATÓRIO 09</div>
+      <h1>Campo de fótons <span>virtuais</span></h1>
+      <p>Eventos 3D calculados no IFRO com Intel Embree. Receptor independente neste navegador, reconstruindo uma cena 2D a partir de colisões.</p>
+    </header>
+    <div class="layout">
+      <section class="panel scene-panel" aria-label="Reconstrução espacial">
+        <div class="panel-title"><strong>Memória espacial do receptor</strong><span id="scene-status" class="status">Aguardando</span></div>
+        <canvas id="field" width="920" height="720" role="img" aria-label="Cena espacial reconstruída dos eventos recebidos"></canvas>
+        <div class="legend"><span><i class="key emission"></i> Emissão</span><span><i class="key contact"></i> Contato</span><span><i class="key complete"></i> Objeto identificado</span></div>
+        <p class="note">As caixas só surgem a partir dos contatos validados. Os eventos DPH1 ainda trazem identificadores de objeto, o que facilita seu agrupamento.</p>
+      </section>
+      <section class="panel controls" aria-label="Controles e medições">
+        <div class="panel-title"><strong>Experimento de transporte</strong><span class="source">IFRO → navegador</span></div>
+        <label for="loss">Perda proposital de eventos</label>
+        <select id="loss"><option value="0">Nenhuma</option><option value="2" selected>2 eventos em 17 (12% sintético)</option></select>
+        <div class="buttons">
+          <button id="start" type="button">Iniciar transmissão</button>
+          <button id="repair" type="button" class="secondary" disabled>Recuperar eventos</button>
+          <button id="rtt" type="button" class="secondary">Medir RTT</button>
+        </div>
+        <div class="stats">
+          <div><span>Eventos aceitos</span><b id="received">0 / 17</b></div>
+          <div><span>Eventos faltantes</span><b id="missing">0</b></div>
+          <div><span>Objetos completos</span><b id="objects">0 / 2</b></div>
+          <div><span>Bytes DPH1 recebidos</span><b id="bytes">0</b></div>
+          <div><span>RTT mediano ao IFRO</span><b id="rtt-p50">Não medido</b></div>
+          <div><span>RTT p95 ao IFRO</span><b id="rtt-p95">Não medido</b></div>
+        </div>
+        <p id="message" class="message" role="status" aria-live="polite">Inicie a transmissão ou meça o RTT entre este navegador e o IFRO.</p>
+        <div class="footnote">RTT inclui rede, HTTP e navegador. Não é tempo de propagação da luz nem distância física. A perda selecionada é artificial, não perda medida na Tenda.</div>
+      </section>
+    </div>
+    <footer>Experimento somente de leitura · Cena sintética · Sem autenticação administrativa da Tenda · Sem comandos motores · Origem Embree 4</footer>
+  </main>
+</body>
+</html>
