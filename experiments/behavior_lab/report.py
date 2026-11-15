@@ -4,9 +4,10 @@
 No network, no credentials. Private results are never uploaded automatically.
 """
 import argparse
-import html
+import base64
 import json
 import os
+import struct
 from pathlib import Path
 
 TEMPLATE=r'''<!doctype html>
@@ -33,7 +34,12 @@ code{font-size:.92em}.wide{margin-top:16px}@media(max-width:800px){.grid{grid-te
 <p class="muted">O contador de colisões representa tentativas de avançar bloqueadas pelo simulador, não impactos nem danos físicos. Os testes exibem a coerência interna do modelo e sua estabilidade durante uma execução cronometrada.</p></div>
 </main><script id="data" type="application/json">__DATA__</script><script>
 "use strict";
-const data=JSON.parse(document.getElementById('data').textContent);const summary=data.summary;const frames=data.frames;
+const data=JSON.parse(document.getElementById('data').textContent);const summary=data.summary;
+const octets=Uint8Array.from(atob(data.positions_base64),c=>c.charCodeAt(0));
+const vectors=new DataView(octets.buffer);
+const frames=Array.from({length:data.seconds},(_,i)=>({tick:i*10,
+  agents:Array.from({length:2},(_,which)=>({pose_truth_for_evaluator:Array.from({length:3},(__,component)=>
+    vectors.getInt16(i*12+which*6+component*2,true)/(component===2?1000:100))}))}));
 const cv=document.getElementById('map'),cx=cv.getContext('2d'),slider=document.getElementById('time');
 const colors=['#67d5b1','#f2a35e'];let running=false,timer=null;
 function draw(sec){
@@ -69,7 +75,20 @@ def generate(summary_path:Path, log_path:Path, output:Path):
     if summary.get('kind')!='synthetic_embree_behavior_10min':raise ValueError('Unexpected report type')
     frames=[json.loads(line) for line in log_path.read_text().splitlines()]
     if len(frames)!=summary['ticks']//10:raise ValueError('Second-by-second trace incomplete')
-    dataset=json.dumps({'summary':summary,'frames':frames},separators=(',',':'),ensure_ascii=False)
+    compact=bytearray()
+    for second,frame in enumerate(frames):
+        if frame.get('tick')!=second*10 or len(frame.get('agents',[]))!=2:
+            raise ValueError('Unexpected tick/agent sequence')
+        for agent in frame['agents']:
+            coords=agent['pose_truth_for_evaluator']
+            if len(coords)!=3:raise ValueError('Unexpected pose representation')
+            coords=[round(coords[0]*100),round(coords[1]*100),round(coords[2]*1000)]
+            if not all(-32768<=p<=32767 for p in coords):
+                raise ValueError('Pose not representable by compact trace')
+            compact.extend(struct.pack('<hhh',*coords))
+    dataset=json.dumps({'summary':summary,'seconds':len(frames),
+        'positions_base64':base64.b64encode(compact).decode('ascii')},
+        separators=(',',':'),ensure_ascii=False)
     dataset=dataset.replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
     output.parent.mkdir(parents=True,exist_ok=True)
     fd=os.open(output,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)

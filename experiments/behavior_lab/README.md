@@ -74,3 +74,13 @@ python3 experiments/behavior_lab/report.py \
 O relatório mostra trajetórias **do avaliador**, não percepção interna nem
 localização observada por sensores. Os valores são inteiramente sintéticos e
 não precisam de Internet; não injetar código HTML ou dados externos no relatório.
+
+### Tamanho do relatório visual
+
+O HTML autocontido armazena apenas os deslocamentos e ângulos do avaliador em
+centímetros e milirradianos (seis `int16` por segundo, `7200` bytes em 10 minutos,
+base64 embutido). A interface decodifica isso localmente no navegador, sem
+carregar arquivos externos ou transmitir dados. **Não incorpora o log integral de
+sensores**, que permanece em JSONL privado. A quantização acrescenta erro de até
+meio centímetro e 0,0005 radiano na visualização, sem mudar os resultados
+originais. O arquivo HTML de 600 segundos fica abaixo de 20 KB.
