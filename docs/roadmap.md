@@ -42,3 +42,6 @@
 
 - [x] P9e. Selecionar renderer físico de referência para fótons virtuais: Mitsuba 3 offline; manter Rust como codec/transporte e wgpu opcional para visualização, sem exigir RTX ou mudar a rede. Ver `docs/lighting-engine-decision.md`.
 - [ ] P9f. Integrar cena física de referência com Mitsuba 3 em executor externo e comparar emissões/contatos/energia por distribuição, não por identidade de amostra Monte Carlo.
+
+- [x] P9g. Medir compatibilidade real do IFRO: Mitsuba 3.9.1 SIGILL; Embree 4.3.3 CPU SSE4.2 aprovado, benchmark primário e difuso com cinco repetições e código reproduzível.
+- [ ] P9h. Expor Embree via ABI C/Rust segura para geração de eventos de fótons e medir consumo de banda antes da transmissão pela mesh.
