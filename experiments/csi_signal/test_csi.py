@@ -8,7 +8,7 @@ ROOT=Path(__file__).parent
 sys.path.insert(0,str(ROOT))
 from analyze import analyze,decode_log,save_no_overwrite
 from generate_fixture import generate
-from capture_serial import eligible_port
+from capture_serial import eligible_port,safe_csi_line
 
 
 class CSIPipelineTests(unittest.TestCase):
@@ -50,6 +50,19 @@ class CSIPipelineTests(unittest.TestCase):
             self.assertEqual(json.loads(output.read_text())['input_provenance'],
                              'synthetic_csi_fixture')
             with self.assertRaises(FileExistsError):save_no_overwrite(output,report)
+
+    def test_usb_collector_drops_untrusted_or_identity_bearing_lines(self):
+        good=generate(20).splitlines()
+        live_header=good[0].replace('synthetic_csi_fixture','esp32c3_live_passive').encode()
+        self.assertTrue(safe_csi_line(live_header))
+        self.assertFalse(safe_csi_line(good[0].encode()))
+        self.assertTrue(safe_csi_line(good[1].encode()))
+        self.assertTrue(safe_csi_line(good[-1].encode()))
+        for line in (b'CSI_AGG_V1,0,1,6,2,0,0,0,AA:BB:CC:DD:EE:FF,0,3,4',
+                     b'CSI_SESSION_V1,origin=esp32c3_live_passive,channel=6,windows=600,ssid=PRIVATE',
+                     b'CSI_COMPLETE_V1,windows=600,radio=stopped,password=anything',
+                     b'CSI_AGG_V1,0,1,6,2,0,0,0,0,0,1,3,secret'):
+            self.assertFalse(safe_csi_line(line))
 
     def test_serial_path_requires_named_usb(self):
         self.assertFalse(eligible_port(Path('/tmp/not-a-device')))

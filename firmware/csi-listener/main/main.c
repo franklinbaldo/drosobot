@@ -74,6 +74,7 @@ typedef struct {
     double profile_delta_sum;
     uint32_t comparable_profiles;
     uint16_t prior_pairs;
+    uint16_t prior_skip;
     double prior_normalized[CSI_MAX_BYTES / 2];
 } window_t;
 
@@ -95,14 +96,16 @@ static void update_window(window_t *w, const csi_sample_t *s) {
     double delta = 0.0;
     for (uint16_t i = skip; i < n; ++i) {
         const double normalized = powers[i] / mean_power;
-        if (w->prior_pairs == n) delta += fabs(normalized - w->prior_normalized[i]);
+        if (w->prior_pairs == n && w->prior_skip == skip)
+            delta += fabs(normalized - w->prior_normalized[i]);
         w->prior_normalized[i] = normalized;
     }
-    if (w->prior_pairs == n) {
+    if (w->prior_pairs == n && w->prior_skip == skip) {
         w->comparable_profiles++;
         w->profile_delta_sum += delta / (n - skip);
     }
     w->prior_pairs = n;
+    w->prior_skip = skip;
     w->frames++;
     w->rssi_sum += s->rssi;
     w->noise_sum += s->noise_floor;

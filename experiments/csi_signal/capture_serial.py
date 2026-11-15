@@ -7,12 +7,38 @@ Never records arbitrary ESP-IDF console output or raw CSI. Unix tty only.
 from __future__ import annotations
 import argparse
 import os
+import re
 from pathlib import Path
 import select
 import termios
 import time
 
 SAFE_PREFIXES=(b'CSI_SESSION_V1,',b'CSI_AGG_V1,',b'CSI_COMPLETE_V1,')
+_INTEGER=re.compile(rb'[0-9]{1,13}\Z')
+_NUMBER=re.compile(rb'-?[0-9]{1,12}(?:\.[0-9]{1,8})?\Z')
+
+
+def safe_csi_line(line:bytes)->bool:
+    """Accept only the strictly numeric, fixed schema, never arbitrary log text."""
+    if len(line)>320:return False
+    chunks=line.split(b',')
+    if line.startswith(b'CSI_SESSION_V1,'):
+        if len(chunks)!=4 or chunks[1]!=b'origin=esp32c3_live_passive':return False
+        if not(chunks[2].startswith(b'channel=') and chunks[3].startswith(b'windows=')):
+            return False
+        channel=chunks[2][8:];windows=chunks[3][8:]
+        return bool(_INTEGER.fullmatch(channel) and _INTEGER.fullmatch(windows)
+                    and 1<=int(channel)<=11 and 10<=int(windows)<=1200)
+    if line.startswith(b'CSI_AGG_V1,'):
+        if len(chunks)!=12:return False
+        return all(_INTEGER.fullmatch(v) for v in chunks[1:8]) and \
+            all(_NUMBER.fullmatch(v) for v in chunks[8:12])
+    if line.startswith(b'CSI_COMPLETE_V1,'):
+        if len(chunks)!=3 or not chunks[1].startswith(b'windows=') or chunks[2]!=b'radio=stopped':
+            return False
+        windows=chunks[1][8:]
+        return bool(_INTEGER.fullmatch(windows) and 10<=int(windows)<=1200)
+    return False
 
 
 def eligible_port(path:Path)->bool:
@@ -51,8 +77,8 @@ def capture(path:Path,output:Path,seconds:int=610)->int:
                     item,_,tail=buffer.partition(b'\n')
                     buffer=bytearray(tail)
                     item=item.strip()
-                    if len(item)>320 or not item.startswith(SAFE_PREFIXES):continue
-                    if any(b<32 or b>126 for b in item):continue
+                    if not item.startswith(SAFE_PREFIXES):continue
+                    if not safe_csi_line(item):continue
                     if item.startswith(b'CSI_SESSION_V1,'):
                         if header:raise ValueError('Unexpected multiple receiver sessions')
                         if b'origin=esp32c3_live_passive' not in item:
