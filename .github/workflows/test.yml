@@ -87,6 +87,22 @@ jobs:
           cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_embree_ingest
           cargo +stable build --release --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_embree_ingest
           cp rust/drosobot-sim/target/release/photon_embree_ingest dist-embree/
+      - name: Compile Embree optical-range sensor and test 10-second synthetic behaviour
+        run: |
+          g++ -std=c++17 -O2 -DNDEBUG -march=x86-64 \
+            experiments/behavior_lab/embree_sensor.cpp -lembree4 \
+            -o dist-embree/embree_sensor
+          python3 -m unittest discover -s experiments/behavior_lab -p 'test_model.py' -v
+          python3 -m compileall -q experiments/behavior_lab
+          printf '1 1 0.3\n' | dist-embree/embree_sensor | grep -E '^[0-9]+[.]'
+          python3 -u experiments/behavior_lab/run.py \
+            --sensor dist-embree/embree_sensor \
+            --output dist-embree/behavior-smoke.json --duration 10 --fast
+          python3 experiments/behavior_lab/report.py \
+            --summary dist-embree/behavior-smoke.json \
+            --log dist-embree/behavior-smoke.jsonl \
+            --output dist-embree/behavior-smoke.html
+          python3 -c "from pathlib import Path; import json; d=json.loads(Path('dist-embree/behavior-smoke.json').read_text()); assert d['ticks']==100 and d['paced_realtime'] is False; assert Path('dist-embree/behavior-smoke.html').stat().st_size>3000; print('Synthetic behavior smoke PASS')"
       - name: End-to-end Embree rays to DPH1 to reconstructed scene
         run: |
           dist-embree/embree_photon_events --output dist-embree/source_journal.dph1
