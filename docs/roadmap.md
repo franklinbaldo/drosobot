@@ -48,3 +48,6 @@
 
 - [x] P9i. Gerar eventos DPH1 a partir de interseções reais Embree 4 no IFRO e construir receptor/evaluador Rust com corpus sintético, sem I/O de rede ou motor.
 - [ ] P9j. Integrar transporte local IFRO → receptor independente em celular/Tenda Mesh com limite de taxa, medição de latência, segurança e replay.
+
+- [x] P9j-a. Implementar receptor web read-only do registro Embree/DPH1 com SSE, replay, injeção de perdas sintéticas, Canvas2D e medição RTT HTTP no navegador, sem acessar Tenda ou motores.
+- [ ] P9j-b. Publicar sessão no IFRO em porta privada com isolamento systemd; verificar conectividade e latência a partir de um **segundo dispositivo real na Tenda**, sem usar o próprio IFRO como substituto.
