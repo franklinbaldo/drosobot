@@ -1,0 +1,16 @@
+menu "DrosoBot CSI observer on SEPARATE test ESP32-C3 ONLY"
+    config DROSOBOT_CSI_SSID
+        string "Wi-Fi SSID of authorized Tenda LAN (keep sdkconfig private)"
+        default "DROSOBOT_UNCONFIGURED"
+    config DROSOBOT_CSI_PASSWORD
+        string "Wi-Fi password (NEVER commit sdkconfig)"
+        default ""
+    config DROSOBOT_CSI_PING_INTERVAL_MS
+        int "ICMP interval for known associated Wi-Fi gateway in ms"
+        range 1000 5000
+        default 1000
+    config DROSOBOT_CSI_MAX_WINDOWS
+        int "Number of one-second feature windows, then stop radio"
+        range 10 600
+        default 600
+endmenu
