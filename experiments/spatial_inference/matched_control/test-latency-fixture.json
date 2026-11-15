@@ -1,0 +1,13 @@
+{
+  "source": "synthetic_test_fixture",
+  "measurement": "ICMP_RTT_NOT_RANGE",
+  "observed_utc": "2026-01-01T00:00:00Z",
+  "wired_source": true,
+  "node_coordinates_known": false,
+  "ftm_ranges_available": false,
+  "client_rssi_available": false,
+  "nodes": {
+    "gateway": {"sent": 4, "received": 4, "rtt_samples_ms": [1.1, 1.8, 1.2, 1.6], "rtt_p50_ms": 1.4, "rtt_p95_ms": 1.8},
+    "mesh_peer": {"sent": 4, "received": 4, "rtt_samples_ms": [3.0, 5.0, 4.0, 6.0], "rtt_p50_ms": 4.5, "rtt_p95_ms": 6.0}
+  }
+}
