@@ -34,3 +34,8 @@
 - [ ] P4d. Revalidar assinaturas reais de argumentos de cada método no gateway, executar apenas as consultas permitidas e registrar latência.
 
 - [x] P4d. Preservar SCPDs originais e WSDL derivado no workspace e no IFRO; confrontar todos os 18 contratos reais e executar 10 consultas SOAP sem parâmetros somente de leitura.
+
+- [x] P9a. Implementar laboratório Rust sem hardware de fótons virtuais, clock lógico, contatos/reflexões, reconstrução limitada, perdas, duplicatas e replay, mantendo a verdade no emissor/avaliador.
+- [ ] P9b. Retirar rótulos semânticos privilegiados dos contatos, introduzir clustering e snapshots compactados com testes de observabilidade.
+- [ ] P9c. Transportar eventos de forma autenticada sobre LAN/mesh real com medidas de atraso, incerteza de relógio e perdas, isolado de controle motor.
+- [ ] P9d. Validar como transduzir evidência geométrica/espacial real em sinais egocêntricos MaleCNS, com baselines e nulls.

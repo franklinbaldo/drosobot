@@ -248,3 +248,4 @@ pub mod malecns;
 
 /// Optional offline radio-fingerprint localization baseline (synthetic fixtures only).
 pub mod wifi;
+pub mod photons;
