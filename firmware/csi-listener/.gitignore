@@ -1,0 +1,6 @@
+# Never commit generated build outputs or local device configuration.
+/build/
+/sdkconfig
+/sdkconfig.old
+/managed_components/
+/dependencies.lock
