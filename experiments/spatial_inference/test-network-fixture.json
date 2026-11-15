@@ -1,0 +1,11 @@
+{
+  "source": "synthetic_test_fixture",
+  "measurement": "ICMP_RTT_NOT_RANGE",
+  "observed_utc": "2026-01-01T00:00:00Z",
+  "node_coordinates_known": false,
+  "client_rssi_available": false,
+  "nodes": {
+    "fictional_mesh_1": {"sent": 4, "received": 4, "rtt_samples_ms": [2.0, 2.5, 3.0, 1.5], "rtt_p50_ms": 2.25, "rtt_p95_ms": 3.0},
+    "fictional_mesh_2": {"sent": 4, "received": 3, "rtt_samples_ms": [5.0, 6.0, 7.0], "rtt_p50_ms": 6.0, "rtt_p95_ms": 7.0}
+  }
+}
