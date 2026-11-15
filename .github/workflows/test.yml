@@ -64,6 +64,51 @@ jobs:
           path: dist-photon/
           if-no-files-found: error
           retention-days: 14
+  embree-bridge:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native Embree 4 API in ephemeral CI runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libembree-dev
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal
+      - name: Build native Embree producer and Rust verifier
+        run: |
+          mkdir -p dist-embree
+          g++ -std=c++17 -O3 -DNDEBUG -march=x86-64 \
+            benchmarks/lighting_cpu/embree_photon_events.cpp -lembree4 \
+            -o dist-embree/embree_photon_events
+          cargo +stable test --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_embree_ingest
+          cargo +stable build --release --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_embree_ingest
+          cp rust/drosobot-sim/target/release/photon_embree_ingest dist-embree/
+      - name: End-to-end Embree rays to DPH1 to reconstructed scene
+        run: |
+          dist-embree/embree_photon_events --output dist-embree/source_journal.dph1
+          test "$(wc -c < dist-embree/source_journal.dph1)" = 712
+          dist-embree/photon_embree_ingest --input dist-embree/source_journal.dph1
+          python3 -c "from pathlib import Path; b=Path('dist-embree/source_journal.dph1').read_bytes(); assert b.startswith(b'DPH1'); b=bytearray(b);b[23]^=1;Path('dist-embree/tampered_journal.dph1').write_bytes(b)"
+          if dist-embree/photon_embree_ingest --input dist-embree/tampered_journal.dph1; then
+            echo 'ERROR: Tampered event journal unexpectedly passed verification'
+            exit 1
+          fi
+          rm dist-embree/tampered_journal.dph1
+          if dist-embree/embree_photon_events --output dist-embree/source_journal.dph1; then
+            echo 'ERROR: Existing journal was overwritten'
+            exit 1
+          fi
+          (cd dist-embree && sha256sum embree_photon_events photon_embree_ingest > SHA256SUMS)
+      - name: Publish Linux binaries for IFRO (no Rust compile on IFRO)
+        uses: actions/upload-artifact@v4
+        with:
+          name: drosobot-embree-dph1-linux-amd64
+          path: |
+            dist-embree/embree_photon_events
+            dist-embree/photon_embree_ingest
+            dist-embree/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
   malecns-shadow:
     runs-on: ubuntu-24.04
     steps:
