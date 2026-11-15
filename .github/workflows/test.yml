@@ -50,6 +50,8 @@ jobs:
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml
       - name: Fictional Wi-Fi fingerprint demo (no collection)
         run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin wifi_demo
+      - name: Virtual photon field reconstruction and replay (no hardware)
+        run: cargo +stable run --release --manifest-path rust/drosobot-sim/Cargo.toml --bin photon_field_demo
   malecns-shadow:
     runs-on: ubuntu-24.04
     steps:
