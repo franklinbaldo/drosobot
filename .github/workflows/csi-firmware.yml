@@ -5,11 +5,6 @@ on:
       - 'firmware/csi-listener/**'
       - 'experiments/csi_signal/**'
       - '.github/workflows/csi-firmware.yml'
-  push:
-    paths:
-      - 'firmware/csi-listener/**'
-      - 'experiments/csi_signal/**'
-      - '.github/workflows/csi-firmware.yml'
   workflow_dispatch:
 
 permissions:
@@ -49,15 +44,20 @@ jobs:
           test -s firmware/csi-listener/build/drosobot_csi_listener.bin
           test -s firmware/csi-listener/build/bootloader/bootloader.bin
           test -s firmware/csi-listener/build/partition_table/partition-table.bin
-          (cd firmware/csi-listener/build && sha256sum drosobot_csi_listener.bin bootloader/bootloader.bin partition_table/partition-table.bin > SHA256SUMS)
+          mkdir -p dist-csi
+          cp firmware/csi-listener/build/drosobot_csi_listener.bin dist-csi/
+          cp firmware/csi-listener/build/bootloader/bootloader.bin dist-csi/
+          cp firmware/csi-listener/build/partition_table/partition-table.bin dist-csi/
+          (cd dist-csi && sha256sum drosobot_csi_listener.bin bootloader.bin partition-table.bin > SHA256SUMS)
+          (cd dist-csi && sha256sum -c SHA256SUMS)
       - name: Publish unattached binary only, NEVER auto-flash
         uses: actions/upload-artifact@v4
         with:
           name: drosobot-standalone-esp32c3-csi-build
           path: |
-            firmware/csi-listener/build/drosobot_csi_listener.bin
-            firmware/csi-listener/build/bootloader/bootloader.bin
-            firmware/csi-listener/build/partition_table/partition-table.bin
-            firmware/csi-listener/build/SHA256SUMS
+            dist-csi/drosobot_csi_listener.bin
+            dist-csi/bootloader.bin
+            dist-csi/partition-table.bin
+            dist-csi/SHA256SUMS
           retention-days: 14
           if-no-files-found: error
